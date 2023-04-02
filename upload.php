@@ -1,31 +1,14 @@
 <?php
-if(isset($_POST['title']) && isset($_FILES['video']['name']) && $_FILES['video']['error'] == 0){
-	$title = $_POST['title'];
-	$fileName = $_FILES['video']['name'];
-	$fileTmpName = $_FILES['video']['tmp_name'];
-	$fileType = $_FILES['video']['type'];
-	$fileSize = $_FILES['video']['size'];
-	$fileExt = pathinfo($fileName, PATHINFO_EXTENSION);
-	$allowedExtensions = array("mp4", "avi", "flv", "wmv");
-	
-	if(in_array($fileExt, $allowedExtensions)){
-		if($fileSize <= 1000000000){ // Maximum file size: 1GB
-			$videoPath = 'videos/' . $fileName;
-			move_uploaded_file($fileTmpName, $videoPath);
-			$videoUrl = 'http://' . $_SERVER['HTTP_HOST'] . '/' . $videoPath;
-			$data = array('title' => $title, 'url' => $videoUrl);
-			$jsonData = json_encode($data);
-			file_put_contents('videos.json', $jsonData . PHP_EOL, FILE_APPEND);
-		}
-		else{
-			echo "Maximum file size allowed is 1GB.";
-		}
-	}
-	else{
-		echo "Invalid file format. Only mp4, avi, flv, and wmv formats are allowed.";
-	}
-}
-else{
-	echo "Title and video file are required.";
+if(isset($_FILES['video'])){
+    $title = $_POST['title'];
+    $file_name = $_FILES['video']['name'];
+    $file_tmp = $_FILES['video']['tmp_name'];
+    $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+    $extensions = array("mp4", "avi", "mov", "wmv");
+    if(in_array($file_ext, $extensions)){
+        $new_file_name = uniqid('', true) . "." . $file_ext;
+        move_uploaded_file($file_tmp, "uploads/" . $new_file_name);
+        echo "<video width='320' height='240' controls><source src='uploads/$new_file_name' type='video/$file_ext'></video><br><b>$title</b><hr>";
+    }
 }
 ?>
